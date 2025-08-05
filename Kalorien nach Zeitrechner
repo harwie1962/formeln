@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MET-Kalorien-Zeitrechner für Bypass-Patienten</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      padding: 20px; 
+      max-width: 600px; 
+      margin: auto; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    h1 { 
+      color: #2c3e50; 
+      text-align: center; 
+      margin-bottom: 10px;
+      font-size: 1.8em;
+    }
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    label { 
+      display: block; 
+      margin-bottom: 8px; 
+      font-weight: bold;
+      color: #34495e;
+    }
+    input { 
+      width: 100%; 
+      padding: 12px; 
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    input:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      padding: 15px;
+      background: #ecf0f1;
+      border-radius: 8px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 10px;
+    }
+    .constants-info { 
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #3498db;
+    }
+    .constants-info h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .met-examples {
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #27ae60;
+    }
+    .met-examples h3 {
+      margin-top: 0;
+      color: #27ae60;
+    }
+    .met-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.9em;
+    }
+    .met-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 4px;
+    }
+    button { 
+      margin-top: 20px; 
+      padding: 15px; 
+      width: 100%; 
+      font-size: 1.1em;
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    #ergebnis { 
+      margin-top: 25px; 
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      text-align: center;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .erfolg {
+      background: linear-gradient(135deg, #d5f4e6 0%, #a8e6cf 100%);
+      color: #27ae60;
+      border: 2px solid #27ae60;
+    }
+    .fehler {
+      background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+      color: #e74c3c;
+      border: 2px solid #e74c3c;
+    }
+    .warnung {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+      border: 2px solid #ffc107;
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 0.95em;
+    }
+    .beide-rechnungen {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .rechnung-box {
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .ohne-blocker {
+      background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+      border: 2px solid #8b5cf6;
+    }
+    .mit-blocker {
+      background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+      border: 2px solid #ef4444;
+    }
+    @media (max-width: 600px) {
+      .beide-rechnungen {
+        grid-template-columns: 1fr;
+      }
+      .met-table {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🏃‍♂️ MET-Kalorien-Zeitrechner</h1>
+  <p class="subtitle">Speziell für Bypass-Patienten entwickelt</p>
+  
+  <div class="input-group">
+    <label>🎯 Gewünschte Kalorien (kcal):</label>
+    <input id="kcal" type="number" value="50" min="1" max="1000">
+  </div>
+  
+  <div class="input-group">
+    <label>⚡ MET-Wert der Aktivität:</label>
+    <input id="met" type="number" value="3" min="0.5" max="6" step="0.1">
+  </div>
+  
+  <div class="input-group">
+    <label>⚖️ Körpergewicht (kg):</label>
+    <input id="gewicht" type="number" value="120" min="40" max="200">
+  </div>
+  
+  <div class="checkbox-group">
+    <input type="checkbox" id="betablocker" checked>
+    <label for="betablocker">💊 Ich nehme Beta-Blocker (15% weniger Kalorienverbrauch)</label>
+  </div>
+  
+  <div class="met-examples">
+    <h3>📋 MET-Werte für sichere Aktivitäten nach Bypass:</h3>
+    <div class="met-table">
+      <div class="met-item"><span>🚿 Duschen</span><span>2,0 MET</span></div>
+      <div class="met-item"><span>🚶‍♂️ Langsames Gehen</span><span>2,5 MET</span></div>
+      <div class="met-item"><span>🚶‍♂️ Normales Gehen</span><span>3,0 MET</span></div>
+      <div class="met-item"><span>🏠 Leichte Hausarbeit</span><span>3,0 MET</span></div>
+      <div class="met-item"><span>🚶‍♂️ Zügiges Gehen</span><span>4,0 MET</span></div>
+      <div class="met-item"><span>🌿 Gartenarbeit (leicht)</span><span>3,5 MET</span></div>
+    </div>
+  </div>
+  
+  <div class="constants-info">
+    <h3>🔬 Wissenschaftliche Konstanten:</h3>
+    <p><strong>3,5</strong> = Sauerstoffverbrauch bei 1 MET (ml O₂/kg/min)<br>
+    <strong>200</strong> = Umrechnungsfaktor von Sauerstoff zu Kalorien<br>
+    <strong>0,85</strong> = Beta-Blocker-Faktor (15% Reduktion)</p>
+  </div>
+  
+  <button onclick="rechnen()">🧮 Zeit berechnen</button>
+  
+  <div id="ergebnis"></div>
+</div>
+
+<script>
+function toFloat(text) {
+  return parseFloat(text.toString().replace(",", "."));
+}
+
+function minutenZuZeitFormat(minuten) {
+  const stunden = Math.floor(minuten / 60);
+  const restMinuten = Math.floor(minuten % 60);
+  const sekunden = Math.round((minuten % 1) * 60);
+  
+  if (stunden > 0) {
+    return `${stunden}h ${restMinuten}min ${sekunden}s`;
+  } else if (restMinuten > 0) {
+    return `${restMinuten}min ${sekunden}s`;
+  } else {
+    return `${sekunden}s`;
+  }
+}
+
+function rechnen() {
+  const kcal = toFloat(document.getElementById("kcal").value);
+  const met = toFloat(document.getElementById("met").value);
+  const gewicht = toFloat(document.getElementById("gewicht").value);
+  const betablocker = document.getElementById("betablocker").checked;
+  
+  const konst1 = 200; // Umrechnungsfaktor
+  const konst2 = 3.5; // MET-Definition
+  const faktor = betablocker ? 0.85 : 1.0;
+  
+  const ergebnisDiv = document.getElementById("ergebnis");
+  
+  // Eingabevalidierung
+  if (isNaN(kcal) || isNaN(met) || isNaN(gewicht) || kcal <= 0 || met <= 0 || gewicht <= 0) {
+    ergebnisDiv.className = "fehler";
+    ergebnisDiv.innerHTML = "❌ <strong>Fehler:</strong> Bitte alle Felder mit gültigen Werten ausfüllen!";
+    return;
+  }
+  
+  // Sicherheitswarnung für hohe MET-Werte nach Bypass
+  if (met > 4.0) {
+    ergebnisDiv.className = "fehler";
+    ergebnisDiv.innerHTML = `
+      ⚠️ <strong>ACHTUNG:</strong> ${met} MET ist zu hoch für Bypass-Patienten!<br>
+      <strong>Maximal 4 MET</strong> in den ersten 6-12 Monaten!<br>
+      Bitte sprechen Sie mit Ihrem Kardiologen!
+    `;
+    return;
+  }
+  
+  // Berechnungen
+  const zeitMitFaktor = (kcal * konst1) / (met * konst2 * gewicht * faktor);
+  const zeitOhneFaktor = (kcal * konst1) / (met * konst2 * gewicht);
+  
+  ergebnisDiv.className = "erfolg";
+  
+  if (betablocker) {
+    const unterschied = zeitMitFaktor - zeitOhneFaktor;
+    ergebnisDiv.innerHTML = `
+      <div class="beide-rechnungen">
+        <div class="rechnung-box ohne-blocker">
+          <h4>Ohne Beta-Blocker:</h4>
+          <strong>${zeitOhneFaktor.toFixed(2)} Min</strong><br>
+          <small>(${minutenZuZeitFormat(zeitOhneFaktor)})</small>
+        </div>
+        <div class="rechnung-box mit-blocker">
+          <h4>Mit Beta-Blocker:</h4>
+          <strong>${zeitMitFaktor.toFixed(2)} Min</strong><br>
+          <small>(${minutenZuZeitFormat(zeitMitFaktor)})</small>
+        </div>
+      </div>
+      <p style="margin-top: 15px; font-size: 0.95em;">
+        💊 <strong>Beta-Blocker-Effekt:</strong> ${unterschied.toFixed(2)} Min länger<br>
+        📊 <strong>Formel:</strong> (${kcal} × 200) ÷ (${met} × 3,5 × ${gewicht} × ${faktor}) = ${zeitMitFaktor.toFixed(2)} Min
+      </p>
+    `;
+  } else {
+    ergebnisDiv.innerHTML = `
+      <p><strong>⏱️ Benötigte Zeit: ${zeitOhneFaktor.toFixed(2)} Minuten</strong></p>
+      <p><small>(${minutenZuZeitFormat(zeitOhneFaktor)})</small></p>
+      <p style="font-size: 0.9em; margin-top: 10px;">
+        📊 <strong>Formel:</strong> (${kcal} × 200) ÷ (${met} × 3,5 × ${gewicht}) = ${zeitOhneFaktor.toFixed(2)} Min
+      </p>
+    `;
+  }
+  
+  // Zusätzliche Sicherheitshinweise
+  let warnung = "";
+  if (met >= 3.5 && met <= 4.0) {
+    warnung = `
+      <div class="warnung">
+        ⚠️ <strong>Vorsicht:</strong> ${met} MET ist an der oberen Grenze für Bypass-Patienten. 
+        Pulskontrolle ist Pflicht! Maximal ${betablocker ? '85-90' : '100-110'} BPM.
+      </div>
+    `;
+  }
+  
+  ergebnisDiv.innerHTML += warnung;
+}
+
+// Automatische Berechnung bei Eingabeänderung
+document.getElementById("kcal").addEventListener("input", rechnen);
+document.getElementById("met").addEventListener("input", rechnen);
+document.getElementById("gewicht").addEventListener("input", rechnen);
+document.getElementById("betablocker").addEventListener("change", rechnen);
+
+// Initiale Berechnung
+rechnen();
+</script>
+</body>
+</html>
